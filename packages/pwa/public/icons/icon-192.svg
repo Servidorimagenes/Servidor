@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="lens" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bg)" />
+  <g fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" transform="translate(24, 28)">
+    <!-- Cámara -->
+    <path d="M 24 40 L 44 14 L 100 14 L 120 40 L 134 40 C 142 40 148 46 148 54 L 148 116 C 148 124 142 130 134 130 L 10 130 C 2 130 -4 124 -4 116 L -4 54 C -4 46 2 40 10 40 Z" />
+    <!-- Lente central -->
+    <circle cx="72" cy="85" r="28" fill="url(#lens)" stroke="#ffffff" stroke-width="8" />
+    <circle cx="72" cy="85" r="12" fill="#ffffff" stroke="none" />
+    <!-- Rayo de subida o nube -->
+    <path d="M 120 60 L 120 74 M 113 67 L 127 67" stroke="#38bdf8" stroke-width="6" />
+  </g>
+</svg>

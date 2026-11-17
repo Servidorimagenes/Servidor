@@ -1,0 +1,19 @@
+{
+  "name": "@catalog/pwa",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@catalog/core-image": "workspace:*",
+    "@catalog/storage-github": "workspace:*",
+    "@catalog/storage-gdrive": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

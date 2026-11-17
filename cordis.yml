@@ -1,0 +1,41 @@
+# cordis.yml - Configuración declarativa de plugins y servicios para el servidor de imágenes
+name: servidor-imagenes-web
+version: 1.0.0
+
+services:
+  # Definición de Servicios (Capabilities)
+  image-processor:
+    package: "@catalog/core-image"
+    enabled: true
+    config:
+      maxDimension: 1000
+      quality: 0.78
+      format: "image/webp"
+      preserveAspect: true
+
+  storage-provider:
+    package: "@catalog/storage-github"
+    enabled: true
+    config:
+      defaultProvider: "github"
+      cdn: "jsdelivr" # jsdelivr | github-pages | raw
+      jsdelivrTemplate: "https://cdn.jsdelivr.net/gh/{owner}/{repo}@{branch}/{path}"
+      rawTemplate: "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}"
+      githubPagesTemplate: "https://{owner}.github.io/{repo}/{path}"
+      branch: "main"
+      baseFolder: "catalog-images"
+
+  storage-gdrive-fallback:
+    package: "@catalog/storage-gdrive"
+    enabled: false # Proveedor alternativo opcional
+
+  catalog-pwa:
+    package: "@catalog/pwa"
+    enabled: true
+    config:
+      themeColor: "#2563eb"
+      appName: "Catálogo Imágenes PWA"
+      shortName: "ImgCatálogo"
+      autoCopyUrl: true
+      saveHistoryLocally: true
+      maxHistoryItems: 100

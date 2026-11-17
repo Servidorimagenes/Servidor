@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Servidor de imágenes livianas de alta calidad para catálogos con GitHub y jsDelivr CDN" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+  <title>ImgCatálogo - Servidor CDN de Imágenes</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <img src="./icons/icon-192.svg" alt="Logo" class="app-logo" />
+        <div>
+          <h1 class="app-title">ImgCatálogo</h1>
+          <span class="app-badge" id="cdn-status-badge">jsDelivr CDN Activo</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-settings" class="icon-btn" title="Configuración" aria-label="Configuración">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navegación por pestañas -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="upload-tab">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        Subir Foto
+      </button>
+      <button class="nav-tab" data-tab="history-tab">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Historial (<span id="history-count">0</span>)
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Pestaña 1: Subir Foto -->
+      <section id="upload-tab" class="tab-pane active">
+        <!-- Banner de advertencia si no hay configuración -->
+        <div id="unconfigured-alert" class="alert-box alert-warning hidden">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-body">
+            <strong>Configuración requerida:</strong>
+            <p>Ingresa tu repositorio y token de GitHub en configuración para subir imágenes a tu CDN.</p>
+            <button id="btn-setup-now" class="btn btn-sm btn-secondary">Configurar Ahora</button>
+          </div>
+        </div>
+
+        <!-- Zona de selección de imagen -->
+        <div class="card upload-card">
+          <div class="capture-buttons-row">
+            <!-- Botón Cámara Móvil Nativa -->
+            <button type="button" class="action-btn camera-btn" id="btn-trigger-camera">
+              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <span>Tomar Foto</span>
+            </button>
+            <input type="file" id="camera-input" accept="image/*" capture="environment" class="file-hidden" />
+
+            <!-- Botón Galería -->
+            <button type="button" class="action-btn gallery-btn" id="btn-trigger-gallery">
+              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <span>Elegir Galería</span>
+            </button>
+            <input type="file" id="gallery-input" accept="image/jpeg,image/png,image/webp,image/avif" class="file-hidden" />
+          </div>
+
+          <!-- Preview & Compression Details -->
+          <div id="preview-container" class="preview-container hidden">
+            <div class="image-preview-wrapper">
+              <img id="image-preview" src="" alt="Previsualización de producto" />
+              <button id="btn-remove-image" class="btn-remove-circle" title="Quitar foto">✕</button>
+            </div>
+
+            <!-- Resumen de Optimización -->
+            <div class="compression-stats-card">
+              <div class="stat-badge">
+                <span class="stat-label">Original:</span>
+                <span id="stat-original-size" class="stat-val">0 MB</span>
+              </div>
+              <div class="stat-arrow">➔</div>
+              <div class="stat-badge stat-highlight">
+                <span class="stat-label">Optimizado (WebP):</span>
+                <span id="stat-compressed-size" class="stat-val">0 KB</span>
+              </div>
+              <div class="stat-savings" id="stat-savings-pill">
+                Ahorro del 0%
+              </div>
+            </div>
+            <div class="stat-dim" id="stat-dimensions">Resolución: 0 x 0 px</div>
+          </div>
+        </div>
+
+        <!-- Formulario de Metadatos del Producto -->
+        <div class="card form-card">
+          <h2 class="card-title">Detalles del Producto</h2>
+
+          <div class="form-group">
+            <label for="product-title" class="form-label">Nombre del Producto <span class="required">*</span></label>
+            <input type="text" id="product-title" class="form-input" placeholder="Ej: Camisa Slim Fit Azul Marino" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label for="product-category" class="form-label">Categoría</label>
+              <input type="text" id="product-category" class="form-input" placeholder="Ej: Ropa, Calzado..." value="productos" />
+            </div>
+            <div class="form-group col-half">
+              <label for="product-sku" class="form-label">SKU / Código</label>
+              <input type="text" id="product-sku" class="form-input" placeholder="Ej: CAM-0024" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="product-detail" class="form-label">Detalles / Descripción Breve</label>
+            <textarea id="product-detail" class="form-input form-textarea" rows="2" placeholder="Ej: 100% algodón, botones perlados, catálogo temporada 2026."></textarea>
+          </div>
+
+          <!-- Opciones avanzadas de compresión -->
+          <details class="advanced-details">
+            <summary class="advanced-summary">⚙️ Ajustes de Compresión (Opcional)</summary>
+            <div class="advanced-content">
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label for="max-dimension-select" class="form-label">Resolución Máx.</label>
+                  <select id="max-dimension-select" class="form-select">
+                    <option value="800">800 px (Ultra liviana ~30 KB)</option>
+                    <option value="1000" selected>1000 px (Recomendada ~50 KB)</option>
+                    <option value="1200">1200 px (Alta nitidez ~80 KB)</option>
+                  </select>
+                </div>
+                <div class="form-group col-half">
+                  <label for="quality-select" class="form-label">Calidad WebP</label>
+                  <select id="quality-select" class="form-select">
+                    <option value="0.72">72% (Máximo ahorro)</option>
+                    <option value="0.78" selected>78% (Equilibrio perfecto)</option>
+                    <option value="0.85">85% (Máximo detalle)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Botón de Subida Principal -->
+          <button id="btn-upload" class="btn btn-primary btn-block" disabled>
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span id="upload-btn-text">Selecciona una foto para subir</span>
+          </button>
+        </div>
+
+        <!-- Tarjeta de Resultado de Subida (Éxito) -->
+        <div id="result-card" class="card result-card hidden">
+          <div class="result-header">
+            <div class="result-badge-success">✓ ¡Imagen Subida al Servidor CDN!</div>
+            <button id="btn-close-result" class="icon-btn-sm" title="Cerrar">✕</button>
+          </div>
+
+          <div class="result-body">
+            <div class="history-thumb-col" style="width: 72px;">
+              <div class="result-preview-thumb" style="width: 72px; height: 72px;">
+                <img id="result-thumb" src="" alt="Thumbnail CDN" style="width: 100%; height: 100%;" />
+              </div>
+              <button id="btn-copy-result-small" class="btn-copy-small-thumb" title="Copiar URL directa">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copiar</span>
+              </button>
+            </div>
+            <div class="result-info">
+              <div class="result-title" id="result-filename">producto.webp</div>
+              <div class="result-cdn-notice">🚀 Distribuida globalmente en jsDelivr Edge CDN sin límite de descargas.</div>
+            </div>
+          </div>
+
+          <!-- Enlace Directo Principal -->
+          <div class="link-field-group">
+            <label class="link-label">Enlace Directo para Inventario / Catálogo:</label>
+            <div class="copy-input-group">
+              <input type="text" id="result-cdn-url" class="form-input form-input-code" readonly />
+              <button id="btn-copy-cdn" class="btn btn-secondary copy-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+            </div>
+          </div>
+
+          <!-- Snippet Markdown & HTML -->
+          <div class="link-field-group">
+            <label class="link-label">Snippet Markdown:</label>
+            <div class="copy-input-group">
+              <input type="text" id="result-markdown" class="form-input form-input-code" readonly />
+              <button id="btn-copy-markdown" class="btn btn-secondary copy-btn">Copiar</button>
+            </div>
+          </div>
+          <!-- Botones de Acción Posterior a la Subida -->
+          <div class="result-actions-row">
+            <button id="btn-view-in-history" class="btn btn-sm btn-secondary">
+              📁 Ver en el Historial
+            </button>
+            <button id="btn-upload-another" class="btn btn-sm btn-primary">
+              📸 Subir Otra Foto
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pestaña 2: Historial de Imágenes -->
+      <section id="history-tab" class="tab-pane">
+        <div class="history-header-card card">
+          <div class="history-title-row">
+            <div>
+              <h2 class="card-title" style="margin-bottom: 2px;">📁 Historial de Imágenes</h2>
+              <p class="history-subtitle">Miniaturas y enlaces directos CDN listos para copiar a tu inventario.</p>
+            </div>
+            <button id="btn-clear-history" class="btn btn-sm btn-outline-danger" title="Borrar historial local">
+              Vaciar
+            </button>
+          </div>
+
+          <!-- Barra de Búsqueda Interactiva -->
+          <div class="search-box-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="history-search" class="form-input search-input" placeholder="Buscar por nombre, SKU, categoría o URL..." />
+            <button id="btn-clear-search" class="btn-clear-search hidden" title="Limpiar búsqueda">✕</button>
+          </div>
+
+          <!-- Contador y Filtro de Categorías -->
+          <div class="history-meta-bar">
+            <span id="history-counter-text" class="history-counter-text">Cargando imágenes...</span>
+          </div>
+        </div>
+
+        <!-- Lista de Tarjetas del Historial -->
+        <div id="history-list" class="history-grid">
+          <!-- Tarjetas renderizadas dinámicamente con miniaturas, nombre y URL asignada -->
+        </div>
+
+        <!-- Estado vacío sin imágenes -->
+        <div id="history-empty" class="empty-state">
+          <div class="empty-icon">📷</div>
+          <h3>Aún no has subido imágenes</h3>
+          <p>Toma una foto de tu producto para optimizarla y obtener el enlace directo para tu inventario.</p>
+        </div>
+
+        <!-- Estado sin coincidencias en búsqueda -->
+        <div id="history-no-match" class="empty-state hidden">
+          <div class="empty-icon">🔍</div>
+          <h3>Sin resultados</h3>
+          <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+          <button id="btn-reset-search-state" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
+            Mostrar Todas las Imágenes
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal Lightbox para ver la imagen en grande -->
+    <div id="lightbox-modal" class="modal-overlay hidden">
+      <div class="lightbox-card">
+        <div class="lightbox-header">
+          <div class="lightbox-title" id="lightbox-title">Nombre del Producto</div>
+          <button id="btn-close-lightbox" class="icon-btn-sm" title="Cerrar">✕</button>
+        </div>
+        <div class="lightbox-image-container">
+          <img id="lightbox-img" src="" alt="Vista ampliada" />
+        </div>
+        <div class="lightbox-footer">
+          <div class="lightbox-url-row">
+            <input type="text" id="lightbox-url-input" class="form-input form-input-code" readonly />
+            <button id="btn-copy-lightbox-url" class="btn btn-sm btn-primary">Copiar URL</button>
+            <a id="btn-open-lightbox-url" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">
+              Abrir ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Configuración -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">⚙️ Configuración del Servidor CDN</h2>
+          <button id="btn-close-settings" class="icon-btn-sm" title="Cerrar modal">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Proveedor Selector -->
+          <div class="form-group">
+            <label for="setting-provider" class="form-label">Proveedor de Almacenamiento:</label>
+            <select id="setting-provider" class="form-select">
+              <option value="github" selected>GitHub + jsDelivr CDN (Gratuito, Rápido y Recomendado)</option>
+              <option value="gdrive">Google Drive (OAuth2)</option>
+            </select>
+          </div>
+
+          <!-- Sección GitHub -->
+          <div id="github-settings-section">
+            <div class="info-callout">
+              <strong>100% Gratuito y de Alta Velocidad:</strong>
+              Las imágenes se guardan en tu repositorio de GitHub y se entregan al instante a tus catálogos mediante la red CDN mundial de jsDelivr.
+            </div>
+
+            <div class="form-group">
+              <label for="setting-gh-owner" class="form-label">Usuario u Organización de GitHub <span class="required">*</span></label>
+              <input type="text" id="setting-gh-owner" class="form-input" placeholder="Ej: luis-ventas" />
+            </div>
+
+            <div class="form-group">
+              <label for="setting-gh-repo" class="form-label">Nombre del Repositorio <span class="required">*</span></label>
+              <input type="text" id="setting-gh-repo" class="form-input" placeholder="Ej: catalogo-imagenes" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-half">
+                <label for="setting-gh-branch" class="form-label">Rama</label>
+                <input type="text" id="setting-gh-branch" class="form-input" value="main" />
+              </div>
+              <div class="form-group col-half">
+                <label for="setting-gh-folder" class="form-label">Carpeta Base</label>
+                <input type="text" id="setting-gh-folder" class="form-input" value="productos" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="setting-gh-token" class="form-label">Personal Access Token (PAT) <span class="required">*</span></label>
+              <input type="password" id="setting-gh-token" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" />
+              <small class="form-help">
+                Se guarda únicamente de forma local en tu navegador (LocalStorage). Requiere permiso <code>repo</code> o <code>contents: write</code>.
+                <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreferrer" class="help-link">Crear Token en GitHub ↗</a>
+              </small>
+            </div>
+
+            <button id="btn-test-connection" class="btn btn-secondary btn-block">
+              🔍 Probar Conexión con Repositorio
+            </button>
+            <div id="test-connection-result" class="test-result-box hidden"></div>
+          </div>
+
+          <!-- Sección Google Drive -->
+          <div id="gdrive-settings-section" class="hidden">
+            <div class="info-callout warning">
+              <strong>Aviso de Google Drive:</strong>
+              Google Drive restringe descargas masivas concurrentes y enlaces directos con cuotas de uso (Error 403). Se recomienda para respaldo, no para catálogos masivos.
+            </div>
+
+            <div class="form-group">
+              <label for="setting-gd-token" class="form-label">Google OAuth Access Token <span class="required">*</span></label>
+              <input type="password" id="setting-gd-token" class="form-input" placeholder="ya29.xxxxxxxxxxxxxxxxxxxx" />
+            </div>
+
+            <div class="form-group">
+              <label for="setting-gd-folder" class="form-label">ID de Carpeta en Drive (Opcional)</label>
+              <input type="text" id="setting-gd-folder" class="form-input" placeholder="Ej: 1A2b3C4d5E..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-save-settings" class="btn btn-primary btn-block">Guardar Configuración</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
